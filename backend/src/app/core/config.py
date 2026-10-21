@@ -1,4 +1,4 @@
-"""
+﻿"""
 Configuration management for AccessLens backend.
 Loads settings from environment variables with sensible defaults for dev/test/prod.
 """
@@ -49,6 +49,9 @@ class Config:
     DYNAMODB_TABLE_REPAIRS: str = field(default="accesslens-repairs")
     DYNAMODB_TABLE_VERIFICATION: str = field(default="accesslens-verification")
     
+    # S3
+    S3_REPORTS_BUCKET: str = field(default="accesslens-reports")
+    
     # Bedrock
     BEDROCK_MODEL_ID: str = field(default="anthropic.claude-3-sonnet-20240229-v1:0")
     
@@ -92,6 +95,7 @@ class Config:
             DYNAMODB_TABLE_FINDINGS=os.getenv("DYNAMODB_TABLE_FINDINGS", "accesslens-findings"),
             DYNAMODB_TABLE_REPAIRS=os.getenv("DYNAMODB_TABLE_REPAIRS", "accesslens-repairs"),
             DYNAMODB_TABLE_VERIFICATION=os.getenv("DYNAMODB_TABLE_VERIFICATION", "accesslens-verification"),
+            S3_REPORTS_BUCKET=os.getenv("S3_REPORTS_BUCKET", "accesslens-reports"),
             BEDROCK_MODEL_ID=os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-sonnet-20240229-v1:0"),
             USE_LOCAL_DYNAMODB=os.getenv("USE_LOCAL_DYNAMODB", "true").lower() == "true",
             LOCAL_DYNAMODB_ENDPOINT=os.getenv("LOCAL_DYNAMODB_ENDPOINT", "http://localhost:8000"),
@@ -129,3 +133,5 @@ def get_config() -> Config:
     if _config is None:
         _config = Config.from_env()
     return _config
+
+

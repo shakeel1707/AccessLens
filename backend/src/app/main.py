@@ -9,7 +9,7 @@ from fastapi.openapi.utils import get_openapi
 
 from app.core.config import get_config
 from app.core.errors import ErrorHandlingMiddleware
-from app.routers import scan, repair, patch, verification
+from app.routers import scan, repair, patch, verification, report
 
 
 def create_app() -> FastAPI:
@@ -92,6 +92,11 @@ def create_app() -> FastAPI:
         prefix="/api",
         tags=["verification"],
     )
+    app.include_router(
+        report.router,
+        prefix="/api",
+        tags=["reports"],
+    )
     
     # Custom OpenAPI schema (optional)
     def custom_openapi():
@@ -111,3 +116,4 @@ def create_app() -> FastAPI:
     return app
 # Create FastAPI application instance for module import
 app = create_app()
+
