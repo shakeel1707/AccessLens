@@ -109,3 +109,5 @@ def create_app() -> FastAPI:
     app.openapi = custom_openapi
     
     return app
+# Create FastAPI application instance for module import
+app = create_app()

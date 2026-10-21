@@ -237,3 +237,41 @@ class VerificationResultModel(BaseModel):
     def from_dynamodb_item(cls, item: dict[str, Any]) -> "VerificationResultModel":
         """Create from DynamoDB item."""
         return cls(**item)
+
+# ============================================================================
+# Patch Application Jobs Table Model (Task 15)
+# ============================================================================
+
+class PatchApplicationStatus(str, Enum):
+    """Status of patch application job."""
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class PatchJobModel(BaseModel):
+    """Patch Application Jobs table model."""
+    job_id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="Unique job ID")
+    scan_id: str = Field(..., description="Associated scan ID")
+    repair_ids: list = Field(..., description="List of repair IDs to apply")
+    
+    status: PatchApplicationStatus = Field(default=PatchApplicationStatus.PENDING, description="Job status")
+    applied_count: int = Field(default=0, description="Number of patches applied")
+    failed_count: int = Field(default=0, description="Number of patches that failed")
+    error_message: Optional[str] = Field(None, description="Error message if job failed")
+    error_details: Optional[dict] = Field(None, description="Detailed error information")
+    
+    created_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    completed_at: Optional[str] = Field(None, description="Completion timestamp")
+    
+    class Config:
+        use_enum_values = True
+    
+    def to_dynamodb_item(self):
+        return {"job_id": self.job_id, "scan_id": self.scan_id, "repair_ids": self.repair_ids, "status": self.status, "applied_count": self.applied_count, "failed_count": self.failed_count, "error_message": self.error_message, "error_details": self.error_details, "created_at": self.created_at, "updated_at": self.updated_at, "completed_at": self.completed_at}
+    
+    @classmethod
+    def from_dynamodb_item(cls, item):
+        return cls(**item)

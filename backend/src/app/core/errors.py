@@ -91,3 +91,7 @@ def create_error_response(
 ) -> dict[str, Any]:
     """Helper to create standardized error response."""
     return ErrorResponse(code, message, status_code, request_id).to_dict()
+
+class DynamoDBError(Exception):
+    """Base exception for DynamoDB operations."""
+    pass
