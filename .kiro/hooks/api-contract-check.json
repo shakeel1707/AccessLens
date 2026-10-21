@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "API Contract Check",
+      "trigger": "PostFileSave",
+      "description": "Validates API contracts between FastAPI routes and TypeScript API clients after file saves",
+      "matcher": "(routes|endpoints|api|client).*\\.(py|ts)$",
+      "action": {
+        "type": "command",
+        "command": "powershell -NoProfile -Command @\"\n# Parse input from Kiro\n`$input = [System.IO.StreamReader]::new([System.Console]::OpenStandardInput()).ReadToEnd() | ConvertFrom-Json\n`$filePath = `$input.file.path\n\n# Normalize path separators\n`$filePath = `$filePath -replace '\\\\\\\\', '/'\n\nWrite-Output \"=== API Contract Check ===\"\nWrite-Output \"File saved: `$filePath\"\n\n# CHECK 1: FastAPI route file\nif (`$filePath -match '(routes|endpoints).*\\.py`$') {\n  Write-Output \"\"\n  Write-Output \"📋 FASTAPI ROUTE DETECTED\"\n  Write-Output \"Checklist for `$filePath:\"\n  Write-Output \"  ✓ All route functions have docstrings\"\n  Write-Output \"  ✓ Docstrings include HTTP status codes (200, 400, 404, 500, etc.)\"\n  Write-Output \"  ✓ Request body schema documented (request_body annotation)\"\n  Write-Output \"  ✓ Response schema documented (response_model)\"\n  Write-Output \"  ✓ Error responses documented (status_code, responses={})\"\n  Write-Output \"  ✓ Parameters documented (path params, query params, headers)\"\n  Write-Output \"\"\n  Write-Output \"📖 Run: npm run validate:api (if available) to check OpenAPI spec consistency\"\n}\n\n# CHECK 2: TypeScript API client file\nif (`$filePath -match '(api|client).*\\.ts`$' -or (`$filePath -match '\\.ts`$' -and `$filePath -match 'client')) {\n  Write-Output \"\"\n  Write-Output \"🔗 TYPESCRIPT API CLIENT DETECTED\"\n  Write-Output \"Checklist for `$filePath:\"\n  Write-Output \"  ✓ Request/response types match backend OpenAPI spec\"\n  Write-Output \"  ✓ Enum values synchronized with backend\"\n  Write-Output \"  ✓ Optional fields match backend (nullable, required)\"\n  Write-Output \"  ✓ Status code handling matches backend error responses\"\n  Write-Output \"  ✓ Error interfaces align with FastAPI error schemas\"\n  Write-Output \"\"\n  Write-Output \"🔄 Run: npm run validate:api or npm run generate:client (if available)\"\n}\n\nWrite-Output \"\"\nWrite-Output \"ℹ️  Tip: Use OpenAPI spec as source of truth for client generation\"\nWrite-Output \"\"\nexit 0\n\"@\n",
+        "timeout": 15
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Regression Test Reminder",
+      "trigger": "PostTaskExec",
+      "description": "Reminds agent to verify accessibility repairs with Playwright E2E and axe-core automated scans before task completion",
+      "matcher": "accessibility|repair|a11y|wcag|contrast|aria|keyboard|screen.?reader",
+      "action": {
+        "type": "agent",
+        "prompt": "Task completed: This task involved accessibility repairs. Verify the fix with comprehensive testing:\n\n1. **Playwright E2E Tests**\n   - Write or update E2E tests covering the repaired component\n   - Test keyboard navigation (Tab, Enter, Escape, arrow keys)\n   - Verify screen reader announcements (ARIA live regions, roles)\n   - Run: `npm run test:e2e` or `yarn test:e2e` if available\n\n2. **axe-core Automated Scan**\n   - Run axe-core scan on the repaired component page\n   - Confirm no new accessibility violations\n   - Run: `npm run test:a11y` or equivalent\n   - Compare scan results against baseline (should show improvement or no regression)\n\n3. **Manual Verification** (if no automated tests exist)\n   - Open component in browser\n   - Test with keyboard only (no mouse)\n   - Test with screen reader (NVDA, JAWS, or VoiceOver)\n   - Document testing methodology in task notes\n\n4. **Documentation**\n   - Add test results to task completion notes\n   - Document any known limitations or edge cases\n   - If regressions found, do not mark task complete—flag for remediation\n\nDo NOT mark this task complete without verification evidence. Include test output or screenshots."
+      }
+    }
+  ]
+}

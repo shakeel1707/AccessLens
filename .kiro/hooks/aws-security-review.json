@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "AWS Security Review",
+      "trigger": "PreTaskExec",
+      "description": "Advisory security review for AWS infrastructure tasks: IAM least privilege, browser isolation, resource exposure, and cost implications",
+      "matcher": "aws|iam|lambda|s3|dynamodb|rds|security|infrastructure|cloudformation|cdk",
+      "action": {
+        "type": "agent",
+        "prompt": "⚠️  AWS Infrastructure Task Detected — Security Review Required\n\nBefore executing this task, perform a security review on these dimensions:\n\n1️⃣  **IAM Least Privilege**\n   - [ ] All policies use explicit Allow (no wildcards in actions)\n   - [ ] Resources are scoped to specific ARNs (no Resource: \"*\")\n   - [ ] Conditions are used where appropriate (IP ranges, time windows, etc.)\n   - [ ] Service roles have only the minimum required permissions\n   - [ ] Cross-account access requires explicit trust relationships\n   - [ ] Temporary credentials used where possible (no long-lived API keys)\n\n2️⃣  **Browser Isolation (Front-End Security)**\n   - [ ] No direct database access from browser (all queries via API gateway)\n   - [ ] All AWS calls routed through backend API with proper auth/auth\n   - [ ] Client-side credentials never stored in browser (no hardcoded keys)\n   - [ ] Secrets stored in AWS Secrets Manager or environment variables (backend only)\n   - [ ] Signed URLs used for S3 access instead of public buckets\n\n3️⃣  **Resource Exposure Prevention**\n   - [ ] No sensitive data in CloudWatch logs (remove PII, credentials, tokens)\n   - [ ] No hardcoded secrets in code, environment variables, or config files\n   - [ ] S3 buckets have `block-public-access` enabled\n   - [ ] RDS databases not publicly accessible (deploy in private subnet)\n   - [ ] Lambda functions run in VPC if accessing private resources\n   - [ ] API Gateway uses API keys or OAuth (not open to anonymous)\n\n4️⃣  **Cost & Performance Implications**\n   - [ ] Auto-scaling policies documented (min/max instances)\n   - [ ] Data transfer costs reviewed (egress charges, cross-region replication)\n   - [ ] Compute resource sizing justified (t2.micro vs. larger instances)\n   - [ ] Reserved Instances or Savings Plans considered for predictable workloads\n   - [ ] Unused resources will be cleaned up (no orphaned instances, snapshots, etc.)\n\n5️⃣  **Compliance & Audit**\n   - [ ] CloudTrail logging enabled for all API calls\n   - [ ] VPC Flow Logs enabled for network monitoring\n   - [ ] Tags applied consistently for cost allocation and compliance\n   - [ ] Backup/disaster recovery strategy documented\n\n⛔  **CRITICAL: Do NOT Automatically Deploy Resources**\n   - This review is advisory only\n   - Do NOT execute terraform apply, cdk deploy, or CloudFormation updates without explicit human approval\n   - Flag any security concerns or missing checks before proceeding\n   - If any checklist item is not met, stop and request clarification before deploying\n\n📝 Record your findings in task notes. If you identify risks, create a separate security remediation task before deploying."
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Repair Safety Guard",
+      "trigger": "PreToolUse",
+      "description": "Blocks deletion of critical project files via deterministic checks; requests confirmation only when safety threshold is exceeded",
+      "matcher": "delete_file|str_replace|fs_write|fs_append",
+      "action": {
+        "type": "command",
+        "command": "powershell -NoProfile -Command @\"\n# Parse input from Kiro\n`$input = [System.IO.StreamReader]::new([System.Console]::OpenStandardInput()).ReadToEnd() | ConvertFrom-Json\n`$toolName = `$input.tool.name\n`$params = `$input.tool.arguments\n\n# Track if we should block\n`$shouldBlock = `$false\n`$blockReason = \"\"\n\n# DETERMINISTIC SAFETY CHECK 1: Block deletion of critical files\nif (`$toolName -eq \"delete_file\") {\n  `$targetFile = `$params.targetFile\n  \n  # Define critical file patterns\n  `$criticalPatterns = @(\n    'package\\.json',\n    'tsconfig.*\\.json',\n    'pyproject\\.toml',\n    '\\.env(\\.|$)',\n    'docker-compose.*\\.ya?ml',\n    'Dockerfile',\n    'src[/\\\\](app|main|index)\\.',\n    'src[/\\\\]__init__\\.py',\n    '(requirements|setup|poetry)\\.txt',\n    'next\\.config\\.',\n    'vite\\.config\\.',\n    'vitest\\.config\\.',\n    'jest\\.config\\.',\n    '\\.github[/\\\\]workflows[/\\\\].*\\.ya?ml'\n  )\n  \n  foreach (`$pattern in `$criticalPatterns) {\n    if (`$targetFile -match `$pattern) {\n      `$shouldBlock = `$true\n      `$blockReason = \"Critical file cannot be deleted: `$targetFile\"\n      break\n    }\n  }\n}\n\n# DETERMINISTIC SAFETY CHECK 2: Warn on .env modifications without backup context\n# (Advisory only - do not block; agent has context)\nif (`$toolName -in @(\"str_replace\", \"fs_write\", \"fs_append\")) {\n  `$targetPath = `$params.path\n  if (`$targetPath -match \"\\.env(\\.|$)\") {\n    # Log advisory (exit 0, allow operation)\n    Write-Warning \"Modifying secrets file: `$targetPath. Ensure backup exists before deployment.\"\n  }\n}\n\n# OUTPUT: Decision\nif (`$shouldBlock) {\n  `$decision = @{\n    hookSpecificOutput = @{\n      permissionDecision = \"ask\"\n      permissionDecisionReason = `$blockReason\n    }\n  } | ConvertTo-Json -Depth 10\n  Write-Output `$decision\n  exit 0  # Hook processed; Kiro will ask user for confirmation\n} else {\n  exit 0  # Allow tool to proceed\n}\n\"@\n",
+        "timeout": 10
+      }
+    }
+  ]
+}
