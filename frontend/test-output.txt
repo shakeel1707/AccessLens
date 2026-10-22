@@ -1,0 +1,17 @@
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mC:/Users/Shakeel/OneDrive/Desktop/New folder/frontend[39m
+
+ [32m✓[39m tests/task25_suite7_json_roundtrip.test.ts [2m ([22m[2m9 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m tests/minimal.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 1[2mms[22m[39m
+ [32m✓[39m tests/simple.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 2[2mms[22m[39m
+ [32m✓[39m tests/task21.test.ts [2m ([22m[2m21 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/task23.test.ts [2m ([22m[2m30 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/components.test.ts [2m ([22m[2m12 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m tests/task22.test.ts [2m ([22m[2m26 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/task20.test.ts [2m ([22m[2m30 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m8 passed[39m[22m[90m (8)[39m
+[2m      Tests [22m [1m[32m130 passed[39m[22m[90m (130)[39m
+[2m   Start at [22m 00:30:35
+[2m   Duration [22m 775ms[2m (transform 157ms, setup 0ms, collect 360ms, tests 30ms, environment 1ms, prepare 1.25s)[22m
+
