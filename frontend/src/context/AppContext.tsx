@@ -6,6 +6,8 @@ export interface Finding {
   severity: "critical" | "serious" | "moderate" | "minor";
   description: string;
   selector: string;
+  html?: string;
+  explanation?: string;
 }
 
 export interface Repair {
@@ -13,8 +15,15 @@ export interface Repair {
   finding_id: string;
   status: "pending" | "approved" | "rejected";
   patch: string;
-  confidence: number;
+  confidence: "high" | "medium" | "low";
+  original_code: string;
+  proposed_code: string;
+  assumptions: string[];
+  warnings: string[];
+  file_type: "html" | "css" | "javascript";
+  selector: string;
 }
+
 
 export interface AppContextType {
   scanId: string | null;
