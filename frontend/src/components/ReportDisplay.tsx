@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
 
 interface Report {
@@ -15,7 +15,7 @@ interface Report {
 
 export const ReportDisplay: React.FC = () => {
   const { scanId, findings } = useApp();
-  const [report, setReport] = useState<Report | null>(null);
+  const [_report, _setReport] = useState<Report | null>(null);
 
   const downloadReport = async (format: "json" | "html") => {
     if (!scanId) return;

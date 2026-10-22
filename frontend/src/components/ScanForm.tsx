@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { URLValidator } from "../services/urlValidator";
 import { ApiClient } from "../services/apiClient";
@@ -43,7 +43,7 @@ export const ScanForm: React.FC = () => {
     try {
       const response = await ApiClient.submitScan(url);
       setScanId(response.scan_id);
-      setScanStatus(response.status);
+      setScanStatus((response.status as any) || "completed");
       setError(null);
       setUrl("");
     } catch (err) {
