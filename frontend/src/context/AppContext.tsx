@@ -24,6 +24,31 @@ export interface Repair {
   selector: string;
 }
 
+export interface Report {
+  scan_id: string;
+  url: string;
+  scan_date: string;
+  wcag_version: "WCAG 2.1 Level A" | "WCAG 2.1 Level AA" | "WCAG 2.1 Level AAA";
+  before_violations: {
+    critical: number;
+    serious: number;
+    moderate: number;
+    minor: number;
+    total: number;
+  };
+  after_violations: {
+    critical: number;
+    serious: number;
+    moderate: number;
+    minor: number;
+    total: number;
+  };
+  fixed_count: number;
+  new_violations_count: number;
+  unresolved_count: number;
+  improvement_percentage: number;
+}
+
 
 export interface AppContextType {
   scanId: string | null;
@@ -36,6 +61,9 @@ export interface AppContextType {
   setRepairs: (repairs: Repair[]) => void;
   error: string | null;
   setError: (error: string | null) => void;
+  report: Report | null;
+  setReport: (report: Report | null) => void;
+
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -46,6 +74,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [findings, setFindings] = useState<Finding[]>([]);
   const [repairs, setRepairs] = useState<Repair[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [report, setReport] = useState<Report | null>(null);
+
+
 
   return (
     <AppContext.Provider
@@ -60,6 +91,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setRepairs,
         error,
         setError,
+        report,
+        setReport,
+
       }}
     >
       {children}
