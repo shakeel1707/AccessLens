@@ -1,46 +1,58 @@
 ﻿import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
+import { URLValidator } from "../services/urlValidator";
+import { ApiClient } from "../services/apiClient";
 
 export const ScanForm: React.FC = () => {
   const [url, setUrl] = useState("");
   const [isValid, setIsValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const { setScanId, setScanStatus, setError } = useApp();
-
-  const validateUrl = (input: string): boolean => {
-    try {
-      new URL(input);
-      // Check for private networks and localhost
-      const hostname = new URL(input).hostname;
-      if (hostname === "localhost" || hostname === "127.0.0.1") {
-        return false;
-      }
-      return true;
-    } catch {
-      return false;
-    }
-  };
+  const validator = new URLValidator();
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setUrl(value);
-    setIsValid(validateUrl(value));
+    setValidationError(null);
+
+    if (!value) {
+      setIsValid(false);
+      return;
+    }
+
+    const result = validator.validate(value);
+    setIsValid(result.isValid);
+
+    if (!result.isValid) {
+      setValidationError(result.errorMessage || "Invalid URL");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!isValid) {
-      setError("Invalid URL");
+      setValidationError("Please enter a valid URL");
       return;
     }
 
+    setIsLoading(true);
+    setScanStatus("scanning");
+
     try {
-      setScanStatus("scanning");
-      setScanId("scan-" + Date.now());
-      // API call would go here
+      const response = await ApiClient.submitScan(url);
+      setScanId(response.scan_id);
+      setScanStatus(response.status);
       setError(null);
+      setUrl("");
     } catch (err) {
-      setError("Failed to start scan");
+      const errorMsg = err instanceof Error ? err.message : "Failed to start scan";
+      setError(errorMsg);
       setScanStatus("error");
+      setValidationError(errorMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -54,12 +66,25 @@ export const ScanForm: React.FC = () => {
           value={url}
           onChange={handleUrlChange}
           placeholder="https://example.com"
-          className={`url-input ${isValid ? "valid" : "invalid"}`}
+          disabled={isLoading}
+          className={`url-input ${isValid ? "valid" : ""} ${validationError ? "invalid" : ""}`}
+          aria-label="Website URL for scanning"
+          aria-invalid={!!validationError}
+          aria-describedby={validationError ? "url-error" : undefined}
         />
-        {!isValid && url && <p className="error">Invalid URL</p>}
+        {validationError && (
+          <p id="url-error" className="error" role="alert">
+            {validationError}
+          </p>
+        )}
       </div>
-      <button type="submit" disabled={!isValid} className="submit-button">
-        Start Scan
+      <button
+        type="submit"
+        disabled={!isValid || isLoading}
+        className="submit-button"
+        aria-busy={isLoading}
+      >
+        {isLoading ? "Scanning..." : "Start Scan"}
       </button>
     </form>
   );
