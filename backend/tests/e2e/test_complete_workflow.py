@@ -418,7 +418,7 @@ class TestE2EPerformance:
         # Should respond in reasonable time (< 2 seconds)
         assert response.status_code == 202
         assert elapsed < 5.0, f"Scan submission took {elapsed}s, expected < 5s"
-        assert response.status_code in [200, 202, 404, 422]
+        
     
     def test_e2e_repair_generation_handles_many_findings(self, client):
         """Test repair generation with many findings"""
@@ -435,7 +435,7 @@ class TestE2EPerformance:
         )
         
         # Should handle reasonably (may accept or reject based on limits)
-        
+        assert response.status_code in [202, 200, 400, 422] 
     
     def test_e2e_report_generation_response_time(self, client):
         """Test that report generation responds in reasonable time"""
