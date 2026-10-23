@@ -109,6 +109,13 @@ class FindingsRepository:
             raise DynamoDBError("Query findings failed")
 
 
+
+    
+    def get_by_scan_id(self, scan_id: str) -> list:
+        """Alias for query_by_scan - get all findings for a scan."""
+        return self.query_by_scan(scan_id)
+
+
 class RepairsRepository:
     """CRUD for Repairs table."""
     
@@ -145,3 +152,23 @@ class VerificationRepository:
         except ClientError as e:
             logger.error(f"Create verification failed: {e}")
             raise DynamoDBError("Create verification failed")
+    
+    def query_by_scan(self, scan_id: str):
+        """Get verification result for a scan."""
+        try:
+            response = self.table.query(
+                KeyConditionExpression="scan_id = :scan_id",
+                ExpressionAttributeValues={":scan_id": scan_id},
+                Limit=1
+            )
+            items = response.get("Items", [])
+            if not items:
+                return None
+            return VerificationResultModel(**items[0])
+        except ClientError as e:
+            logger.error(f"Query verification failed: {e}")
+            raise DynamoDBError("Query verification failed")
+    
+    def get_by_scan_id(self, scan_id: str):
+        """Alias for query_by_scan - get verification result for a scan."""
+        return self.query_by_scan(scan_id)
