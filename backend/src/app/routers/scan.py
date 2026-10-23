@@ -174,10 +174,10 @@ async def submit_scan(
         validation_result = validator.validate(request.url)
         
         if not validation_result.is_valid:
-            logger.warning(f"URL validation failed: {validation_result.error}")
+            logger.warning(f"URL validation failed: {validation_result.error_message}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid URL: {validation_result.error}",
+                detail=f"Invalid URL: {validation_result.error_message}",
             )
         
         # Initialize DynamoDB client and repository

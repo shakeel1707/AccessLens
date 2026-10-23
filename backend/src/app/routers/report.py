@@ -1,4 +1,4 @@
-﻿"""
+"""
 Report Download router: GET /api/report/{scan_id}
 Implements report download endpoint with format negotiation and S3 integration.
 """
@@ -156,7 +156,7 @@ async def download_report(
         report_service = ReportDownloadService()
         
         # Verify scan exists
-        scan = scans_repo.get_by_id(scan_id)
+        scan = scans_repo.get(scan_id)
         if not scan:
             logger.error(f"Scan not found: {scan_id}")
             raise HTTPException(
