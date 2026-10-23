@@ -94,7 +94,7 @@ class TestE2ERealisticViolations:
                 "severity": "high",
                 "html_before": '<div role="button">Click me</div>',
                 "html_after": '<button>Click me</button>',
-                "explanation": "Use semantic HTML elements instead of ARIA role="button" on div"
+                "explanation": "Use semantic HTML elements instead of ARIA role=\"button\" on div"
             }
         }
     

@@ -1,11 +1,12 @@
-"""
-Shared fixtures for E2E tests with AWS mocking setup.
+﻿"""
+Shared fixtures for E2E tests with simple mocking.
 """
 
 import pytest
 import sys
 from pathlib import Path
 from unittest.mock import Mock, MagicMock, patch
+import os
 import json
 
 # Add src to path
@@ -13,88 +14,56 @@ backend_root = Path(__file__).parent.parent.parent
 src_path = backend_root / 'src'
 sys.path.insert(0, str(src_path))
 
-from fastapi.testclient import TestClient
-from app.main import app
-from app.models.schemas import (
-    ScanModel, FindingModel, RepairModel, PatchModel, ReportModel
-)
+# Set dummy AWS credentials to avoid credential errors
+os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
 
+from fastapi.testclient import TestClient
 
 @pytest.fixture(scope="session")
 def anyio_backend():
     """Set async backend for pytest-asyncio"""
     return "asyncio"
 
-
-@pytest.fixture
-def client():
-    """FastAPI test client"""
-    return TestClient(app)
-
-
 @pytest.fixture
 def mock_aws_services(monkeypatch):
-    """Mock AWS services (DynamoDB, S3, Bedrock)"""
-    
-    # Mock DynamoDB responses
+    """Mock AWS services for E2E tests"""
     mock_dynamodb = MagicMock()
+    mock_s3 = MagicMock()
+    mock_bedrock = MagicMock()
+    
     mock_dynamodb.get_item.return_value = {
-        'Item': {
-            'scan_id': {'S': 'test-scan-001'},
-            'user_id': {'S': 'test-user'},
-            'url': {'S': 'https://example.com'},
-            'status': {'S': 'completed'},
-            'findings': {'SS': ['finding-1', 'finding-2']},
-            'timestamp': {'N': '1700000000'}
-        }
+        'Item': {'scan_id': 'test-scan-001', 'status': 'completed'}
     }
     mock_dynamodb.put_item.return_value = {'ResponseMetadata': {'HTTPStatusCode': 200}}
-    mock_dynamodb.update_item.return_value = {'ResponseMetadata': {'HTTPStatusCode': 200}}
-    mock_dynamodb.query.return_value = {'Items': []}
     
-    # Mock S3 responses
-    mock_s3 = MagicMock()
     mock_s3.put_object.return_value = {'ResponseMetadata': {'HTTPStatusCode': 200}}
-    mock_s3.get_object.return_value = {
-        'Body': MagicMock(read=lambda: b'{"report": "data"}')
-    }
+    mock_s3.get_object.return_value = {'Body': MagicMock(read=lambda: b'test')}
     
-    # Mock Bedrock responses
-    mock_bedrock = MagicMock()
-    mock_bedrock.invoke_model.return_value = {
-        'body': MagicMock(read=lambda: json.dumps({
-            'content': [{
-                'text': json.dumps({
-                    'repairs': [
-                        {
-                            'finding_id': 'finding-1',
-                            'repair_id': 'repair-1',
-                            'description': 'Add alt text to image',
-                            'confidence': 0.95,
-                            'patch': '<img src="test.jpg" alt="Test image" />'
-                        }
-                    ]
-                })
-            }]
-        }).encode())
-    }
-    
-    # Patch boto3 clients
-    monkeypatch.setattr(
-        'boto3.client',
-        lambda service, **kwargs: {
-            'dynamodb': mock_dynamodb,
-            's3': mock_s3,
-            'bedrock-runtime': mock_bedrock
-        }.get(service, MagicMock())
-    )
-    
-    return {
-        'dynamodb': mock_dynamodb,
-        's3': mock_s3,
-        'bedrock': mock_bedrock
-    }
+    return {'dynamodb': mock_dynamodb, 's3': mock_s3, 'bedrock': mock_bedrock}
 
+@pytest.fixture
+def client(monkeypatch):
+    """FastAPI test client with mocked database"""
+    # Mock boto3 to avoid real AWS calls
+    mock_boto3 = MagicMock()
+    mock_dynamodb_client = MagicMock()
+    mock_s3_client = MagicMock()
+    
+    mock_boto3.client.side_effect = lambda service, **kwargs: {
+        'dynamodb': mock_dynamodb_client,
+        's3': mock_s3_client
+    }.get(service, MagicMock())
+    
+    mock_boto3.resource.side_effect = lambda service, **kwargs: {
+        'dynamodb': MagicMock(Table=lambda name: MagicMock()),
+        's3': MagicMock()
+    }.get(service, MagicMock())
+    
+    monkeypatch.setitem(__import__('sys').modules, 'boto3', mock_boto3)
+    
+    from app.main import app
+    return TestClient(app)
 
 @pytest.fixture
 def sample_scan_data():
@@ -107,7 +76,6 @@ def sample_scan_data():
         "findings_count": 2,
         "timestamp": 1700000000
     }
-
 
 @pytest.fixture
 def sample_findings_data():
@@ -135,7 +103,6 @@ def sample_findings_data():
         }
     ]
 
-
 @pytest.fixture
 def sample_repair_data():
     """Sample repair proposals"""
@@ -145,70 +112,9 @@ def sample_repair_data():
             "finding_id": "finding-1",
             "scan_id": "scan-e2e-001",
             "description": "Add descriptive alt text",
-            "repair_code": "<img src='test.jpg' alt='Sample image showing accessibility guidelines' />",
+            "repair_code": "<img src='test.jpg' alt='Sample image' />",
             "confidence": 0.95,
-            "explanation": "Added descriptive alt text that conveys the image's purpose",
-            "status": "pending_review"
-        },
-        {
-            "repair_id": "repair-2",
-            "finding_id": "finding-2",
-            "scan_id": "scan-e2e-001",
-            "description": "Increase text contrast",
-            "repair_code": "<p style='color: #333; background: #fff;'>Text</p>",
-            "confidence": 0.88,
-            "explanation": "Changed text color from #888 to #333 to meet WCAG 4.5:1 ratio",
+            "explanation": "Added descriptive alt text",
             "status": "pending_review"
         }
     ]
-
-
-@pytest.fixture
-def mock_playwright_scanner(monkeypatch):
-    """Mock Playwright browser scanner"""
-    
-    async def mock_scan_website(url: str):
-        return [
-            {
-                "type": "missing_alt_text",
-                "element": "<img src='test.jpg' />",
-                "severity": "high",
-                "wcag_criteria": "1.1.1",
-                "message": "Image missing alt text"
-            },
-            {
-                "type": "low_contrast",
-                "element": "<p style='color: #888; background: #fff;'>Text</p>",
-                "severity": "medium",
-                "wcag_criteria": "1.4.3",
-                "message": "Text contrast ratio is 4.48:1, needs to be at least 4.5:1"
-            }
-        ]
-    
-    monkeypatch.setattr(
-        'app.services.scanner.scan_website',
-        mock_scan_website
-    )
-
-
-@pytest.fixture
-def mock_bedrock_repair_generator(monkeypatch):
-    """Mock Bedrock repair generation"""
-    
-    async def mock_generate_repairs(findings: list):
-        return [
-            {
-                "repair_id": f"repair-{i}",
-                "finding_id": finding.get("finding_id"),
-                "description": f"Repair for {finding.get('type')}",
-                "repair_code": "<repair>fixed</repair>",
-                "confidence": 0.90,
-                "explanation": "Auto-generated repair using Bedrock"
-            }
-            for i, finding in enumerate(findings)
-        ]
-    
-    monkeypatch.setattr(
-        'app.services.repair_generator.generate_repairs',
-        mock_generate_repairs
-    )
