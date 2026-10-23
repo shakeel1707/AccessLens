@@ -26,3 +26,24 @@ def mock_aws_services():
 @pytest.fixture
 def sample_scan_data():
     return {'scan_id': 'test-001'}
+
+@pytest.fixture
+def mock_axe_findings():
+    """Mock axe-core findings for different violation types"""
+    return {
+        'alt-text': [{
+            'id': 'image-alt',
+            'impact': 'critical',
+            'nodes': [{'target': ['img'], 'html': '<img src="test.png" />'}],
+            'description': 'Images must have alternative text'
+        }],
+        'form-label': [{
+            'id': 'label',
+            'impact': 'critical',
+            'nodes': [{'target': ['input'], 'html': '<input type="text" />'}],
+            'description': 'Form inputs must have associated labels'
+        }],
+        # Add more violation types...
+    }
+
+
