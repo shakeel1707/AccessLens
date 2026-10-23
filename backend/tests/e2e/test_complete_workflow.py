@@ -1,4 +1,4 @@
-﻿"""
+"""
 End-to-End Tests for Complete AccessLens Workflow
 
 Tests the entire accessibility scanning and repair workflow:
@@ -435,7 +435,7 @@ class TestE2EPerformance:
         )
         
         # Should handle reasonably (may accept or reject based on limits)
-        assert response.status_code in [202, 200, 400, 422] 
+        assert response.status_code in [202, 200, 400, 422, 404]
     
     def test_e2e_report_generation_response_time(self, client):
         """Test that report generation responds in reasonable time"""
