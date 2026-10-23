@@ -17,6 +17,8 @@ pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
 httpx==0.25.1
+moto==4.2.10
+moto[dynamodb,s3,bedrock]==4.2.10
 
 # Code quality
 black==23.12.0
