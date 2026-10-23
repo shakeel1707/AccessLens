@@ -1,0 +1,132 @@
+name: Build, Test, Deploy
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11']
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Lint code
+        run: |
+          cd backend
+          python -m pylint src/app --fail-under=7.0 || true
+
+      - name: Run unit tests
+        run: |
+          cd backend
+          pytest tests/ -v --cov=src/app --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/coverage.xml
+          flags: unittests
+
+      - name: Build Lambda package
+        run: |
+          cd backend
+          mkdir -p build/lambda
+          pip install -r requirements.txt -t build/lambda/
+          cp -r src/app/* build/lambda/
+          cd build/lambda && zip -r ../lambda-package.zip . && cd ../../
+          ls -lh build/lambda-package.zip
+
+      - name: Upload Lambda artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: lambda-package
+          path: backend/build/lambda-package.zip
+
+  deploy-dev:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: dev
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download Lambda artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: lambda-package
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy SAM stack (dev)
+        run: |
+          sam deploy \
+            --template-file backend/infrastructure/template.yaml \
+            --stack-name accesslens-dev \
+            --parameter-overrides Environment=dev \
+            --capabilities CAPABILITY_IAM \
+            --region ${{ env.AWS_REGION }} \
+            --no-confirm-changeset
+
+  deploy-prod:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: prod
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download Lambda artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: lambda-package
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy SAM stack (prod)
+        run: |
+          sam deploy \
+            --template-file backend/infrastructure/template.yaml \
+            --stack-name accesslens-prod \
+            --parameter-overrides Environment=prod \
+            --capabilities CAPABILITY_IAM \
+            --region ${{ env.AWS_REGION }} \
+            --no-confirm-changeset
+
+      - name: Run smoke tests
+        run: |
+          cd backend
+          pytest tests/e2e/ -v --tb=short
+
+      - name: Notify deployment success
+        if: success()
+        run: echo "Deployment to production successful"
