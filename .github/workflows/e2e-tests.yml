@@ -54,7 +54,7 @@ jobs:
         pytest backend/tests/e2e/ -v --cov=app --cov-report=xml --cov-report=term-missing
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         files: ./coverage.xml
         flags: e2e
@@ -62,7 +62,7 @@ jobs:
     
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results-${{ matrix.python-version }}
         path: test-results.xml
@@ -106,3 +106,4 @@ jobs:
     steps:
     - name: Check all tests passed
       run: echo "All E2E tests completed successfully"
+

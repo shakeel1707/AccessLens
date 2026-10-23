@@ -55,7 +55,7 @@ jobs:
           ls -lh build/lambda-package.zip
 
       - name: Upload Lambda artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lambda-package
           path: backend/build/lambda-package.zip
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download Lambda artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: lambda-package
 
@@ -101,7 +101,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download Lambda artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: lambda-package
 
