@@ -48,7 +48,6 @@ src_path = backend_root / 'src'
 sys.path.insert(0, str(src_path))
 
 # Register pytest_asyncio plugin for async test support
-pytest_plugins = ('pytest_asyncio',)
 
 # ========== Imports ==========
 import pytest
