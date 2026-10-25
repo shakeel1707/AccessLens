@@ -56,7 +56,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 import uuid
 from datetime import datetime
-from moto import mock_dynamodb, mock_s3, mock_bedrock
+from moto import mock_dynamodb, mock_s3
 
 
 
@@ -73,7 +73,6 @@ os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
 @pytest.fixture(scope='function')
 @mock_dynamodb
 @mock_s3
-@mock_bedrock
 def mock_boto3():
 
     """
@@ -199,7 +198,7 @@ def mock_aws_services(mock_boto3):
     **Note:** Tests can also use moto's built-in inspection methods directly:
     ```python
     import boto3
-    from moto import mock_dynamodb, mock_s3, mock_bedrock
+    from moto import mock_dynamodb, mock_s3
     
     with mock_aws():
         dynamodb = boto3.client('dynamodb')
