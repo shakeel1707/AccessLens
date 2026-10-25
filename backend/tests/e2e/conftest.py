@@ -56,7 +56,8 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 import uuid
 from datetime import datetime
-from moto import mock_aws
+from moto import mock_dynamodb, mock_s3, mock_bedrock
+
 
 
 # ========== Task 1: Environment Setup ==========
@@ -70,8 +71,11 @@ os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
 
 # ========== Task 2: mock_boto3 Fixture with @mock_aws Decorator ==========
 @pytest.fixture(scope='function')
-@mock_aws
+@mock_dynamodb
+@mock_s3
+@mock_bedrock
 def mock_boto3():
+
     """
     Fixture that activates moto's AWS service mocking.
     
