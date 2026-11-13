@@ -1,0 +1,22 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.15.1, pytest-9.1.1, pluggy-1.7.0 -- C:\Users\Shakeel\AppData\Local\Python\pythoncore-3.15-64\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Shakeel\OneDrive\Desktop\New folder\backend
+configfile: pyproject.toml
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 59 items
+
+tests/e2e/test_complete_workflow.py::TestE2ECompleteWorkflow::test_e2e_workflow_success_happy_path XFAIL [  1%]
+tests/e2e/test_complete_workflow.py::TestE2ECompleteWorkflow::test_e2e_workflow_invalid_url PASSED [  3%]
+tests/e2e/test_complete_workflow.py::TestE2ECompleteWorkflow::test_e2e_workflow_ssrf_prevention PASSED [  5%]
+tests/e2e/test_complete_workflow.py::TestE2ECompleteWorkflow::test_e2e_workflow_multiple_scans_isolation FAILED [  6%]
+tests/e2e/test_complete_workflow.py::TestE2EErrorScenarios::test_e2e_network_timeout_handling FAILED [  8%]
+tests/e2e/test_complete_workflow.py::TestE2EErrorScenarios::test_e2e_repair_generation_with_no_findings FAILED [ 10%]
+tests/e2e/test_complete_workflow.py::TestE2EErrorScenarios::test_e2e_patch_application_with_invalid_scan_id PASSED [ 11%]
+tests/e2e/test_complete_workflow.py::TestE2EErrorScenarios::test_e2e_approval_non_pending_repair PASSED [ 13%]
+tests/e2e/test_complete_workflow.py::TestE2EErrorScenarios::test_e2e_report_generation_missing_scan FAILED [ 15%]
+tests/e2e/test_complete_workflow.py::TestE2EErrorScenarios::test_e2e_concurrent_patch_application PASSED [ 16%]
+tests/e2e/test_complete_workflow.py::TestE2EDataPersistence::test_e2e_scan_data_persisted FAILED [ 18%]
+tests/e2e/test_complete_workflow.py::TestE2EDataPersistence::test_e2e_repairs_associated_with_scan PASSED [ 20%]
+tests/e2e/test_complete_workflow.py::TestE2EDataPersistence::test_e2e_patch_status_tracking PASSED [ 22%]

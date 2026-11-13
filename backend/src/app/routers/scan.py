@@ -105,7 +105,8 @@ async def perform_scan(scan_id: str, url: str, user_id: str, db_client, config):
         
         except asyncio.TimeoutError as e:
             logger.warning(f"Scan {scan_id} timeout (attempt {attempt + 1}/{max_retries + 1}): {str(e)}")
-            error_msg = f"Scan timed out after {config.SCAN_TIMEOUT_SECONDS}s"
+            error_msg = f"TimeoutError: Scan timed out after {config.SCAN_TIMEOUT_SECONDS}s"
+
             
             if attempt < max_retries:
                 delay = base_delay * (2 ** attempt)  # Exponential backoff: 1s, 2s

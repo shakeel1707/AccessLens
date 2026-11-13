@@ -37,9 +37,10 @@ class TestScanRequestValidation:
     
     def test_scan_request_max_length(self):
         """URL max length is 2048."""
-        long_url = "https://example.com/" + "a" * 2000
+        long_url = "https://example.com/" + "a" * 2001
         request = ScanRequest(url=long_url)
         assert len(request.url) == 2048 + 18  # Adjusted for prefix
+
     
     def test_scan_request_too_long(self):
         """URL exceeding 2048 chars rejected."""
