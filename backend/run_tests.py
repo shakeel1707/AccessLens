@@ -1,21 +1,14 @@
 #!/usr/bin/env python
-"""Run Task 14 tests and report results"""
-
+"""Quick test runner to verify fixes"""
 import subprocess
 import sys
-import os
 
-# Change to backend directory
-os.chdir('c:\\Users\\Shakeel\\OneDrive\\Desktop\\New folder\\backend')
-
-# Run pytest
-result = subprocess.run(
-    [sys.executable, '-m', 'pytest', 'tests/unit/test_task14_patch_application.py', '-v', '--tb=short'],
-    capture_output=True,
-    text=True
-)
-
-print(result.stdout)
-print(result.stderr)
+result = subprocess.run([
+    sys.executable, '-m', 'pytest', 
+    'tests/unit/test_schemas.py::TestScanRequestValidation::test_scan_request_max_length',
+    'tests/unit/test_validators.py::TestURLValidation::test_metadata_endpoint_rejected',
+    'tests/unit/test_validators.py::TestURLRedirects::test_max_redirects_enforced',
+    '-xvs'
+], cwd=r'c:\Users\Shakeel\OneDrive\Desktop\New folder\backend')
 
 sys.exit(result.returncode)

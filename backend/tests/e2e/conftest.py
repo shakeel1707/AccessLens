@@ -1,55 +1,20 @@
 """
 End-to-End Test Configuration with AWS Service Mocking
-
-CRITICAL DESIGN: boto3 Mocking Strategy
-========================================
-
-This conftest.py implements a layered mocking strategy to prevent real AWS API calls
-during testing. The key insight is that boto3 credential resolution happens at import time,
-BEFORE the FastAPI application initializes.
-
-Without proper mocking:
-  1. boto3 attempts to load AWS credentials from ~/.aws/credentials or environment
-  2. If credentials are found (or missing), boto3.client() calls try to reach real AWS
-  3. Tests make actual HTTP calls to AWS APIs, causing:
-     - Slow test execution (network latency)
-     - Credential errors on CI systems
-     - Potential cost implications if tests modify resources
-     - Risk of affecting real infrastructure during development
-
-With moto mocking (implemented here):
-  1. moto patches sys.modules['boto3'] and botocore before any app import
-  2. Environment variables are set to dummy values (AWS_ACCESS_KEY_ID='testing', etc.)
-  3. When create_app() imports boto3 and creates clients, boto3 is already patched
-  4. boto3.client('dynamodb') returns a moto mock, not a real AWS client
-  5. All boto3 operations are intercepted and responded to in-memory
-  6. Tests execute quickly with zero real AWS calls
-
-This approach is critical for:
-  - CI/CD reliability (no credential management needed)
-  - Local development (works on any machine without AWS credentials)
-  - Test isolation (each test gets a fresh, empty mock)
-  - Performance (mock operations are ~1000x faster than real AWS)
-  - Security (no real credentials exposed in test logs or CI)
-
-The @mock_dynamodb and @mock_s3 decorators from moto library handle all the patching.
-By applying them to the mock_boto3 fixture (which is used by client fixture), we ensure
-mocking is active whenever tests need AWS services.
 """
 
 import sys
 import os
 from pathlib import Path
 
-# ========== Module-Level Path Configuration ==========
-# Configure sys.path so we can import app.main from backend/src/
 backend_root = Path(__file__).parent.parent.parent
 src_path = backend_root / 'src'
 sys.path.insert(0, str(src_path))
 
-# Register pytest_asyncio plugin for async test support
+os.environ['AWS_ACCESS_KEY_ID'] = 'testing'
+os.environ['AWS_SECRET_ACCESS_KEY'] = 'testing'
+os.environ['AWS_SECURITY_TOKEN'] = 'testing'
+os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
 
-# ========== Imports ==========
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
@@ -57,43 +22,26 @@ import uuid
 from datetime import datetime
 from moto import mock_dynamodb, mock_s3
 
+# Start mocks at session level BEFORE any imports
+@pytest.fixture(scope='session', autouse=True)
+def setup_moto_mocks():
+    """Session-level setup: Start moto mocks before app import."""
+    with mock_dynamodb(), mock_s3():
+        yield
 
-# ========== Environment Setup ==========
-os.environ['AWS_ACCESS_KEY_ID'] = 'testing'
-os.environ['AWS_SECRET_ACCESS_KEY'] = 'testing'
-os.environ['AWS_SECURITY_TOKEN'] = 'testing'
-os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
-
-
-# ========== mock_boto3 Fixture ==========
 @pytest.fixture(scope='function')
-@mock_dynamodb
-@mock_s3
-def mock_boto3():
-    """Fixture that activates moto AWS service mocking."""
-    yield
+def client():
+    """FastAPI TestClient with mocked AWS services (DynamoDB and S3)."""
+    # Apply mocks at function level
+    with mock_dynamodb(), mock_s3():
+        from app.main import create_app
+        app = create_app()
+        yield TestClient(app)
 
-
-# ========== client Fixture ==========
 @pytest.fixture(scope='function')
-def client(mock_boto3):
-    """FastAPI TestClient with mocked AWS services."""
-    from app.main import create_app
-    app = create_app()
-    return TestClient(app)
-
-
-# ========== mock_aws_services Fixture ==========
-@pytest.fixture(scope='function')
-def mock_aws_services(mock_boto3):
+def mock_aws_services(client):
     """Registry of mocked AWS services for test assertions."""
-    return {
-        'dynamodb': MagicMock(),
-        's3': MagicMock()
-    }
-
-
-# ========== Test Data Fixtures ==========
+    return {'dynamodb': MagicMock(), 's3': MagicMock()}
 
 @pytest.fixture(scope='function')
 def sample_scan_data():
@@ -106,7 +54,6 @@ def sample_scan_data():
         'created_at': datetime.utcnow().isoformat(),
         'updated_at': datetime.utcnow().isoformat()
     }
-
 
 @pytest.fixture(scope='function')
 def sample_findings():
@@ -134,7 +81,6 @@ def sample_findings():
         }
     ]
 
-
 @pytest.fixture(scope='function')
 def sample_repairs():
     """Provides realistic sample repair proposals for tests."""
@@ -148,37 +94,52 @@ def sample_repairs():
         }
     ]
 
-
 @pytest.fixture(scope='function')
 def mock_axe_findings():
     """Provides mock Axe accessibility rule definitions for tests."""
     return {
-        'alt_text': {
-            'id': 'alt-text',
-            'impact': 'critical',
-            'wcag': '1.1.1'
-        },
-        'form_label': {
-            'id': 'form-label',
-            'impact': 'critical',
-            'wcag': '1.3.1'
-        }
+        'alt_text': {'id': 'alt-text', 'impact': 'critical', 'wcag': '1.1.1'},
+        'form_label': {'id': 'form-label', 'impact': 'critical', 'wcag': '1.3.1'}
     }
-
 
 @pytest.fixture(scope='function')
 def realistic_html_violations():
     """Provides realistic HTML violation patterns for tests."""
     return {
-        'images_without_alt': {'type': 'alt_text', 'wcag': '1.1.1'},
-        'form_without_labels': {'type': 'form_label', 'wcag': '1.3.1'}
+        'images_without_alt': {
+            'explanation': 'Decorative image or missing alt text',
+            'html_before': '<img src="decorative.jpg">',
+            'html_after': '<img src="decorative.jpg" alt="">',
+            'severity': 'high'
+        },
+        'form_without_labels': {
+            'explanation': 'Use semantic HTML elements instead of ARIA role="button" on div',
+            'html_before': '<input type="text" placeholder="Enter email">',
+            'html_after': '<label>Email<input type="text"></label>',
+            'severity': 'high'
+        },
+        'low_contrast_text': {
+            'explanation': 'Color contrast too low',
+            'html_before': '<p style="color: #999">Low contrast</p>',
+            'html_after': '<p style="color: #000">High contrast</p>',
+            'severity': 'high'
+        },
+        'missing_heading_hierarchy': {
+            'explanation': 'Heading hierarchy violated',
+            'html_before': '<h1>Title</h1><h3>Subtitle</h3>',
+            'html_after': '<h1>Title</h1><h2>Subtitle</h2>',
+            'severity': 'medium'
+        },
+        'aria_misuse': {
+            'explanation': 'Use semantic HTML elements instead of ARIA role="button" on div',
+            'html_before': '<div role="button">Click</div>',
+            'html_after': '<button>Click</button>',
+            'severity': 'high'
+        }
     }
 
-
-# ========== Auto-Use Fixtures ==========
-
 @pytest.fixture(autouse=True, scope='function')
-def mock_dynamodb_tables(mock_boto3):
+def mock_dynamodb_tables():
     """Auto-use fixture that ensures DynamoDB is mocked for all tests."""
     scans_db = {
         'test-001': {

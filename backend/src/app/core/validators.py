@@ -188,6 +188,11 @@ class URLValidator:
         if not hostname:
             return False, "URL has no hostname"
         
+        # Check for metadata endpoints BEFORE IP parsing (to give proper error message)
+        if hostname in ('169.254.169.254', 'metadata.google.internal', 'metadata'):
+            return False, f"Metadata endpoint not allowed: {hostname}"
+
+
         # Try to parse as IP address
         try:
             ip = ipaddress.ip_address(hostname)
@@ -196,12 +201,7 @@ class URLValidator:
         except ValueError:
             # Not an IP, check as domain name
             # Block localhost by name
-            if hostname.lower() in ('localhost', 'localhost.localdomain'):
-                return False, "localhost is not allowed"
-            
-            # Block metadata endpoints
-            if hostname in ('169.254.169.254', 'metadata.google.internal', 'metadata'):
-                return False, f"Metadata endpoint not allowed: {hostname}"
+            pass
         
         return True, None
     

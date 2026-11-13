@@ -1,0 +1,152 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Create backend/tests/e2e/conftest.py with moto setup": [
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913069930
+      },
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913084576
+      },
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913257750
+      }
+    ],
+    "2. Implement mock_boto3 fixture with @mock_aws decorator": [
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913069981
+      },
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913084782
+      },
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913257973
+      }
+    ],
+    "9. Add top-level comment block to conftest.py": [
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913070028
+      },
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913297568
+      },
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913525843
+      }
+    ],
+    "11. Checkpoint - Verify conftest.py syntax and imports": [
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913070078
+      },
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913767647
+      },
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792914158988
+      }
+    ],
+    "13. Verify boto3 mocking is active - No credential errors locally": [
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913070109
+      },
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792914159928
+      }
+    ],
+    "14. Trigger GitHub Actions CI pipeline": [
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913070140
+      },
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792914160413
+      }
+    ],
+    "15. Verify CI test results meet requirements": [
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913070189
+      },
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792914160843
+      }
+    ],
+    "16. Final verification - No AWS credential errors in CI": [
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913070218
+      },
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792914161387
+      }
+    ],
+    "17. Final checkpoint - All requirements verified": [
+      {
+        "executionId": "aad12e1a-2d4e-4646-a9b9-1f5031195dd1",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913070251
+      },
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792914161645
+      }
+    ],
+    "10. Create backend/tests/TESTING.md documentation file": [
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913593283
+      },
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792913756839
+      }
+    ],
+    "12. Run local E2E test suite - Verify all 28 tests pass": [
+      {
+        "executionId": "8dbd769e-e779-4047-9eba-2605b33b0ee3",
+        "chatSessionId": "sess_94368442-9437-4787-b82f-7f22ad9f745e",
+        "timestamp": 1792914159480
+      }
+    ]
+  }
+}
