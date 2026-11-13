@@ -1,7 +1,6 @@
 """
 End-to-End Test Configuration with AWS Service Mocking
 """
-
 import sys
 import os
 from pathlib import Path
@@ -17,26 +16,28 @@ os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
 
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import uuid
 from datetime import datetime
 from moto import mock_dynamodb, mock_s3
 
-# Start mocks at session level BEFORE any imports
-@pytest.fixture(scope='session', autouse=True)
-def setup_moto_mocks():
-    """Session-level setup: Start moto mocks before app import."""
-    with mock_dynamodb(), mock_s3():
-        yield
-
 @pytest.fixture(scope='function')
 def client():
     """FastAPI TestClient with mocked AWS services (DynamoDB and S3)."""
-    # Apply mocks at function level
-    with mock_dynamodb(), mock_s3():
+    # Start mocks BEFORE creating the app
+    dynamodb_mock = mock_dynamodb()
+    s3_mock = mock_s3()
+
+    dynamodb_mock.start()
+    s3_mock.start()
+
+    try:
         from app.main import create_app
         app = create_app()
         yield TestClient(app)
+    finally:
+        dynamodb_mock.stop()
+        s3_mock.stop()
 
 @pytest.fixture(scope='function')
 def mock_aws_services(client):
